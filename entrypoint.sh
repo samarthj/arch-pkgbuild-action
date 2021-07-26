@@ -62,5 +62,5 @@ if [ "$dry_run" == "false" ]; then
 fi
 
 for pkg in "${pkgname[@]}"; do
-  echo "::set-output name=${pkg}::/home/builder/package/${pkg}-${pkgver}-${pkgrel}-${arch}.pkg.tar.zst"
+  echo "::set-output name=${pkg}::${pkgbuild_root}/${pkg}-${pkgver}-${pkgrel}-${arch}.pkg.tar.zst"
 done
