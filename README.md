@@ -30,6 +30,6 @@ Build the specified PKGBUILD for archlinux
 
 ## Outputs
 
-## `pkgname`
+## `n`
 
-The location of the built package. The key name is the actual pkgname of the package in the PKGBUILD. If the package is a split package, then there will be multiple keys with each pkgname.
+The location of the built package. The key name is an incrementing integer for each package in the PKGBUILD. If the package is a split package, then there will be multiple keys starting with "0". For a single package, only 1 key will be present as "0".

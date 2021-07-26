@@ -1,3 +1,5 @@
-Host aur.archlinux.org
-  IdentityFile ~/.ssh/aur
+Host aur aur.archlinux.org
   User aur
+  Hostname aur.archlinux.org
+  IdentityFile /home/builder/.ssh/aur
+  IdentitiesOnly yes

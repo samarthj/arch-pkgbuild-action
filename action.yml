@@ -17,22 +17,14 @@ inputs:
   commit_message:
     description: 'Commit message for the AUR package.'
     required: false
-    default: 'upgpkg: <pkgname> <pkgver>-<pkgrel>'
   dry_run:
     description: 'Used for testing the action. To do a full commit, set this to false'
     required: false
     default: 'true'
 outputs:
-  pkgname:
-    description: 'The location of the built package. The key name is the actual pkgname of the package in the PKGBUILD. If the package is a split package, then there will be multiple keys with each pkgname.'
+  pkgn:
+    description: 'The location of the built package. The key name is an incrementing integer for each package in the PKGBUILD. If the package is a split package, then there will be multiple keys starting with "pkg0". For a single package, only 1 key will be present as "pkg0".'
 
 runs:
   using: 'docker'
   image: 'Dockerfile'
-  args:
-    - ${{ inputs.pkgbuild_root }}
-    - ${{ inputs.aur_username }}
-    - ${{ inputs.aur_email }}
-    - ${{ inputs.aur_ssh_private_key }}
-    - ${{ inputs.commit_message }}
-    - ${{ inputs.dry_run }}
