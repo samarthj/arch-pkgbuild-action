@@ -1,0 +1,38 @@
+---
+name: 'Archlinux PKGBUILD'
+description: 'An action for makepkg on a clean arch image'
+inputs:
+  pkgbuild_root:
+    description: 'The relative location of PKGBUILD root.'
+    required: true
+  aur_username:
+    description: 'Username for the AUR maintainer (used for commit).'
+    required: false
+  aur_email:
+    description: 'Email for the AUR maintainer (used for commit)'
+    required: false
+  aur_ssh_private_key:
+    description: 'Private key with access to AUR package.'
+    required: false
+  commit_message:
+    description: 'Commit message for the AUR package.'
+    required: false
+    default: 'upgpkg: <pkgname> <pkgver>-<pkgrel>'
+  dry_run:
+    description: 'Used for testing the action. To do a full commit, set this to false'
+    required: false
+    default: 'true'
+outputs:
+  pkgname:
+    description: 'The location of the built package. The key name is the actual pkgname of the package in the PKGBUILD. If the package is a split package, then there will be multiple keys with each pkgname.'
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.pkgbuild_root }}
+    - ${{ inputs.aur_username }}
+    - ${{ inputs.aur_email }}
+    - ${{ inputs.aur_ssh_private_key }}
+    - ${{ inputs.commit_message }}
+    - ${{ inputs.dry_run }}
