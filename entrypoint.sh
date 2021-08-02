@@ -111,8 +111,8 @@ else
     git push --set-upstream aur master
   fi
 fi
-echo "cleanup the git directory"
-rm -rf .git
+echo "cleanup the git directory and ssh key"
+rm -rf .git /home/builder/.ssh/aur*
 echo "::endgroup::"
 
 echo "::group::Setting artifact locations"
