@@ -8,6 +8,7 @@ aur_email=${INPUT_AUR_EMAIL}
 aur_ssh_private_key=${INPUT_AUR_SSH_PRIVATE_KEY}
 commit_message=${INPUT_COMMIT_MESSAGE}
 dry_run=${INPUT_DRY_RUN:-true}
+custom_build_cmd=${INPUT_CUSTOM_BUILD_CMD}
 
 HOME=/home/builder
 
@@ -81,7 +82,11 @@ mkdir "/home/builder/packages"
 echo "PKGDEST=/home/builder/packages" >>/home/builder/.makepkg.conf
 validpgpkeys="$(sed -n -e 's/^.*validpgpkeys = //p' .SRCINFO)"
 [ -z "$validpgpkeys" ] || gpg --recv-keys "$validpgpkeys"
-makepkg --config /home/builder/.makepkg.conf -cfCs --needed --noconfirm
+if [ -n "$custom_build_cmd" ]; then
+  "${custom_build_cmd[*]}"
+else
+  makepkg --config /home/builder/.makepkg.conf -cfCs --needed --noconfirm
+fi
 echo "::endgroup::"
 
 echo "::group::Updated .SRCINFO"
