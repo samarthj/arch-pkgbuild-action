@@ -12,15 +12,15 @@ Note: The containerized build does not modify the permissions of the github work
 
 ## `aur_username`
 
-**Optional** Username for the AUR maintainer (used for commit).
+**Required** Username for the AUR maintainer (used for commit).
 
 ## `aur_email`
 
-**Optional** Email for the AUR maintainer (used for commit).
+**Required** Email for the AUR maintainer (used for commit).
 
 ## `aur_ssh_private_key`
 
-**Optional** Private key with access to AUR package.
+**Required** Private key with access to AUR package.
 
 ## `commit_message`
 
@@ -30,9 +30,21 @@ Note: The containerized build does not modify the permissions of the github work
 
 **Optional** Used for testing the action. To do a full commit, set this to false. Default `true`.
 
+## `is_python_pkg`
+
+**Optional** Whether this is a python format package. Based on the PKGBUILD documentations these should be prefixed with "python-", and this action needs that to be true, else the pypi version check is simply ignored. On its own changes no behaviour without the pypi flags. Default `false`.
+
+## `use_pypi_release_version`
+
+**Optional** Whether to upgrade a python package using the latest release on pypi. Requires "is_python_pkg" to be true. It uses the pypi rss feed to read the latest release. Default `false`.
+
+## `use_pypi_prerelease_version`
+
+**Optional** Whether to upgrade a python package using the latest release (including prereleases - a, b, rc & dev) on pypi. Requires "is_python_pkg" to be true. Overrides the "use_pypi_release_version" regardless of value. It uses the pypi rss feed to read the latest release. Default `false`.
+
 ## `custom_build_cmd`
 
-**Optional** Used for specifying a custom build command in-case the standard command is undesirable. Default `makepkg --config /home/builder/.makepkg.conf -cfCs --needed --noconfirm`.
+**Optional** Used for specifying a custom build command in-case the standard command is undesirable. The normal command used is `makepkg --config /home/builder/.makepkg.conf -cfC --needed --nodeps --noconfirm`. Note: --nodeps is used since all dependencies are installed before a build is attempted.
 
 ## Outputs
 
@@ -56,15 +68,10 @@ The "<pkgver>-<pkgrel>" of the built package. The key name is an incrementing in
     aur_email: email@example.com
     aur_ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
     dry_run: false
-    custom_build_cmd:
-      - makepkg
-      - --config
-      - /home/builder/.makepkg.conf
-      - -cfCs
-      - --needed
-      - --noconfirm
+    custom_build_cmd: makepkg --config /home/builder/.makepkg.conf -cfC --needed --nodeps --noconfirm
 
-    # example for specifying paths for builds like golang, that require custom locations for their paths.
+    # example for specifying paths for builds like golang, that require custom locations for their paths. Basically just add like normal envs you would anywhere else.
+  env:
     GOPATH: /home/builder/.local/share/go
     GOCACHE: /home/builder/.cache/go
 ```

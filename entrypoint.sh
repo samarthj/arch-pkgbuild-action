@@ -2,13 +2,8 @@
 
 set -euo pipefail
 
-pkgbuild_root=${INPUT_PKGBUILD_ROOT}
-aur_username=${INPUT_AUR_USERNAME}
-aur_email=${INPUT_AUR_EMAIL}
-aur_ssh_private_key=${INPUT_AUR_SSH_PRIVATE_KEY}
-commit_message=${INPUT_COMMIT_MESSAGE}
-dry_run=${INPUT_DRY_RUN:-true}
-custom_build_cmd=${INPUT_CUSTOM_BUILD_CMD}
+dry_run=${INPUT_DRY_RUN:-'true'}
+custom_build_cmd=${INPUT_CUSTOM_BUILD_CMD:-''}
 
 HOME=/home/builder
 
@@ -19,14 +14,14 @@ sudo pacman-key --init
 sudo pacman-key --populate archlinux
 echo "::endgroup::"
 
-echo "::group::Chown repo and move to \"${pkgbuild_root}\""
-pkgbuild_path="$GITHUB_WORKSPACE/$pkgbuild_root/PKGBUILD"
+echo "::group::Chown repo and move to \"${INPUT_PKGBUILD_ROOT}\""
+pkgbuild_path="$GITHUB_WORKSPACE/$INPUT_PKGBUILD_ROOT/PKGBUILD"
 if [ ! -f "$pkgbuild_path" ]; then
-  echo "ERROR: Could not find the PKGBUILD at \"${pkgbuild_root}\""
+  echo "ERROR: Could not find the PKGBUILD at \"${INPUT_PKGBUILD_ROOT}\""
   exit 1
 fi
-sudo chmod -R a=rwX "$GITHUB_WORKSPACE/$pkgbuild_root/"
-cd "$GITHUB_WORKSPACE/$pkgbuild_root/" || exit 1
+sudo chmod -R a=rwX "$GITHUB_WORKSPACE/$INPUT_PKGBUILD_ROOT/"
+cd "$GITHUB_WORKSPACE/$INPUT_PKGBUILD_ROOT/" || exit 1
 
 echo "::endgroup::"
 
@@ -39,7 +34,7 @@ echo "::endgroup::"
 echo "::group::Setup AUR ssh"
 echo "store aur ssh config"
 ssh-keyscan -v -t "rsa,dsa,ecdsa,ed25519" aur.archlinux.org >>/home/builder/.ssh/known_hosts
-echo "$aur_ssh_private_key" >/home/builder/.ssh/aur
+echo "$INPUT_AUR_SSH_PRIVATE_KEY" >/home/builder/.ssh/aur
 chmod -vR 600 /home/builder/.ssh/*
 ssh-keygen -vy -f /home/builder/.ssh/aur >/home/builder/.ssh/aur.pub
 ls -la /home/builder/.ssh/
@@ -51,41 +46,64 @@ echo "::endgroup::"
 
 echo "::group::Setup AUR git-repo"
 echo "init git repo"
-git init -b wip .
-[ -z "$aur_username" ] &&
-  echo "ERROR: In order to commit to AUR, please add your 'aur_username'" && exit 1
+git init -b master .
+[ -z "$INPUT_AUR_USERNAME" ] &&
+  echo "ERROR: In order to commit to AUR, please add your 'INPUT_AUR_USERNAME'" && exit 1
 echo "save git local config"
-git config --local user.name "$aur_username"
-[ -z "$aur_email" ] &&
-  echo "ERROR: In order to commit to AUR, please add your 'aur_email'" && exit 1
-git config --local user.email "$aur_email"
+git config --local user.name "$INPUT_AUR_USERNAME"
+[ -z "$INPUT_AUR_EMAIL" ] &&
+  echo "ERROR: In order to commit to AUR, please add your 'INPUT_AUR_EMAIL'" && exit 1
+git config --local user.email "$INPUT_AUR_EMAIL"
 git config --local init.defaultbranch "master"
 echo "add ssh://aur@aur.archlinux.org/${pkgbase}.git as a remote"
-git remote add -f aur "ssh://aur@aur.archlinux.org/${pkgbase}.git"
+git remote add aur "ssh://aur@aur.archlinux.org/${pkgbase}.git"
+git fetch aur master
 echo "commit current working tree"
 git add -A
 git commit --message="wip"
-echo "pull rebase the remote"
-git checkout master
-echo "merge the current worktree with 'recursive:theirs' strategy"
-git merge --strategy recursive --strategy-option=theirs --allow-unrelated-histories --no-commit wip
-mapfile -t makedepends < <(sed -n -e 's/^.*makedepends = //p' .SRCINFO)
+echo "pull --rebase the remote"
+git branch --set-upstream-to=aur/master master
+git pull --rebase --strategy recursive --strategy-option=theirs --allow-unrelated-histories --no-commit --no-edit aur master
+git reset --soft HEAD~1
+git fetch aur master
+git status
+git diff FETCH_HEAD
 echo "::endgroup::"
 
-echo "::group::Install make dependencies ${makedepends[*]}"
-sudo pacman -Syyu "${makedepends[@]}" --needed --noconfirm
-mapfile -t pkgname < <(sed -n -e 's/^pkgname = //p' .SRCINFO)
+echo "::group::Install dependencies ${makedepends[*]}"
+makepkg --printsrcinfo >.SRCINFO
+mapfile -t makedepends < <(sed -n -e 's/^\tmakedepends = //p' .SRCINFO)
+mapfile -t checkdepends < <(sed -n -e 's/^\tcheckdepends = //p' .SRCINFO)
+mapfile -t depends < <(sed -n -e 's/^\tdepends = //p' .SRCINFO)
+paru -S "${makedepends[@]}" "${checkdepends[@]}" "${depends[@]}" --noconfirm --skipreview
 echo "::endgroup::"
 
 echo "::group::Build package(s) ${pkgname[*]}"
-mkdir "/home/builder/packages"
-echo "PKGDEST=/home/builder/packages" >>/home/builder/.makepkg.conf
+if [ "${INPUT_IS_PYTHON_PKG:-'false'}" == "true" ] && [[ "$pkgbase" == python-* ]]; then
+  py_pkgname="$(echo "${pkgbase}" | sed -re 's|^python-(.*)$|\1|g')"
+  echo "Using python package ${py_pkgname}"
+  py_pkgprerelease="$(curl -fSsL "https://pypi.org/rss/project/${py_pkgname}/releases.xml" | grep -oP '<title>.*$' | grep -vi 'PyPI' | head -n1 | sed -re 's|^.*>(.*)<.*$|\1|g')"
+  echo "Latest release - ${py_pkgprerelease}"
+  py_pkgrelease="$(curl -fSsL "https://pypi.org/rss/project/${py_pkgname}/releases.xml" | grep -oP '<title>.*$' | grep -vi 'PyPI' | grep -vE 'a|b|rc|dev' | head -n1 | sed -re 's|^.*>(.*)<.*$|\1|g')"
+  echo "Latest release (excluding pre-releases) - ${py_pkgrelease}"
+  if [ "${INPUT_USE_PYPI_PRERELEASE_VERSION:-'false'}" == "true" ]; then
+    echo "Updated PKGBUILD with pkgver=${py_pkgprerelease}"
+    sed -i "s|^pkgver=.*$|pkgver=${py_pkgprerelease}|" PKGBUILD
+  elif [ "${INPUT_USE_PYPI_RELEASE_VERSION:-'false'}" == "true" ]; then
+    echo "Updated PKGBUILD with pkgver=${py_pkgrelease}"
+    sed -i "s|^pkgver=.*$|pkgver=${py_pkgrelease}|" PKGBUILD
+  fi
+elif [ "${INPUT_IS_PYTHON_PKG:-'false'}" == "true" ]; then
+  echo "Expecting python package but the name does not begin with 'python-*'. Ignoring pypi check..."
+fi
+
+mapfile -t pkgname < <(sed -n -e 's/^pkgname = //p' .SRCINFO)
 validpgpkeys="$(sed -n -e 's/^.*validpgpkeys = //p' .SRCINFO)"
 [ -z "$validpgpkeys" ] || gpg --recv-keys "$validpgpkeys"
 if [ -n "$custom_build_cmd" ]; then
-  "${custom_build_cmd[*]}"
+  ${custom_build_cmd}
 else
-  makepkg --config /home/builder/.makepkg.conf -cfCs --needed --noconfirm
+  makepkg --config /home/builder/.makepkg.conf -cfC --needed --nodeps --noconfirm
 fi
 echo "::endgroup::"
 
@@ -102,22 +120,24 @@ if [ -z "$(git diff FETCH_HEAD --stat)" ]; then
   echo 'The pkg is un-changed.'
 else
   echo 'The pkg .SRCINFO has changed.'
+  git add -A
   git status
-  git add .
+  commit_msg="${INPUT_COMMIT_MESSAGE:-"updpkg: ${pkgname[*]} ${pkgver}-${pkgrel}"}"
+  echo "Committing with message: ${commit_msg}"
+  git commit --message="${commit_msg}"
   git status
-  git commit \
-    --message="${commit_message:-"updpkg: ${pkgname[*]} ${pkgver}-${pkgrel}"}"
   if [ "$dry_run" == "false" ]; then
     git push --set-upstream aur master
   fi
 fi
+exit 1
 echo "cleanup the git directory and ssh key"
 rm -rf .git /home/builder/.ssh/aur*
 echo "::endgroup::"
 
 echo "::group::Setting artifact locations"
 for ((i = 0; i < ${#pkgname[@]}; i++)); do
-  echo "${pkgname[@]}"
+  echo "Package: ${pkgname[i]}"
   ver="${pkgname[$i]}-${pkgver}-${pkgrel}"
   echo "::set-output name=pkg${i}::${ver}-${arch}.pkg.tar.zst"
   echo "::set-output name=ver${i}::${ver}"

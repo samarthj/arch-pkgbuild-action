@@ -7,13 +7,13 @@ inputs:
     required: true
   aur_username:
     description: 'Username for the AUR maintainer (used for commit).'
-    required: false
+    required: true
   aur_email:
     description: 'Email for the AUR maintainer (used for commit)'
-    required: false
+    required: true
   aur_ssh_private_key:
     description: 'Private key with access to AUR package.'
-    required: false
+    required: true
   commit_message:
     description: 'Commit message for the AUR package.'
     required: false
@@ -21,9 +21,22 @@ inputs:
     description: 'Used for testing the action. To do a full commit, set this to false'
     required: false
     default: 'true'
-  custom_build_cmd:
-    description: 'Used for specifying a custom build command in-case the standard command is undesirable'
+  is_python_pkg:
+    description: 'Whether this is a python format package. Based on the PKGBUILD documentations these should be prefixed with "python-", and this action needs that to be true, else the pypi version check is simply ignored. On its own changes no behaviour without the pypi flags.'
     required: false
+    default: 'false'
+  use_pypi_release_version:
+    description: 'Whether to upgrade a python package using the latest release on pypi. Requires "is_python_pkg" to be true. It uses the pypi rss feed to read the latest release.'
+    required: false
+    default: 'false'
+  use_pypi_prerelease_version:
+    description: 'Whether to upgrade a python package using the latest release (including prereleases - a, b, rc & dev) on pypi. Requires "is_python_pkg" to be true. Overrides the "use_pypi_release_version" regardless of value. It uses the pypi rss feed to read the latest release.'
+    required: false
+    default: 'false'
+  custom_build_cmd:
+    description: 'Used for specifying a custom build command in-case the standard command is undesirable. The normal command used is "makepkg --config /home/builder/.makepkg.conf -cfC --needed --nodeps --noconfirm". Note: --nodeps is used since all dependencies are installed before a build is attempted.'
+    required: false
+    default: ''
 outputs:
   pkgn:
     description: 'The location of the built package. The key name is an incrementing integer for each package in the PKGBUILD. If the package is a split package, then there will be multiple keys starting with "pkg0". For a single package, only 1 key will be present as "pkg0".'
