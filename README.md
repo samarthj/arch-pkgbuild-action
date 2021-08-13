@@ -54,7 +54,7 @@ The location of the built package. The key name is an incrementing integer for e
 
 ## `ver<n>`
 
-The "<pkgver>-<pkgrel>" of the built package. The key name is an incrementing integer for each package in the PKGBUILD. If the package is a split package, then there will be multiple keys starting with "ver0". For a single package, only 1 key will be present as "ver0".
+The "$pkgver-$pkgrel" of the built package. The key name is an incrementing integer for each package in the PKGBUILD. If the package is a split package, then there will be multiple keys starting with "ver0". For a single package, only 1 key will be present as "ver0".
 
 ## Usage Example
 
