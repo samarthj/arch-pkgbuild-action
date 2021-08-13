@@ -1,8 +1,9 @@
-FROM archlinux:base-devel
+FROM ghcr.io/greyltc/archlinux-aur:paru
 LABEL maintainer="Sam <dev@samarthj.com>"
 
 COPY ./ssh_config /home/builder/.ssh/config
 COPY ./.makepkg.conf /home/builder/.makepkg.conf
+COPY ./pacman.conf /etc/pacman.conf
 
 RUN \
   useradd builder --shell /usr/bin/false && \
@@ -10,10 +11,12 @@ RUN \
   mkdir -pv /home/builder/.config && \
   mkdir -pv /home/builder/.cache && \
   mkdir -pv /home/builder/.local/share && \
+  mkdir -pv /home/builder/packages && \
+  mkdir -pv /home/builder/sources && \
   chown -R builder:builder /home/builder && \
   echo "builder ALL=(ALL) NOPASSWD: ALL" >>/etc/sudoers && \
   pacman -Syyu --needed --noconfirm \
-  pacman-mirrorlist openssl openssh git gzip gnupg zstd
+  pacman-mirrorlist openssl openssh git gzip gnupg base-devel zstd
 
 USER builder
 
