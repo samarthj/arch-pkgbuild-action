@@ -78,6 +78,7 @@ mapfile -t depends < <(sed -n -e 's/^\tdepends = //p' .SRCINFO)
 paru -S "${makedepends[@]}" "${checkdepends[@]}" "${depends[@]}" --noconfirm --skipreview
 echo "::endgroup::"
 
+build_python=false
 echo "::group::Build package(s) ${pkgname[*]}"
 if [ "${INPUT_IS_PYTHON_PKG:-'false'}" == "true" ] && [[ "$pkgbase" == python-* ]]; then
   py_pkgname="$(echo "${pkgbase}" | sed -re 's|^python-(.*)$|\1|g')"
@@ -89,9 +90,11 @@ if [ "${INPUT_IS_PYTHON_PKG:-'false'}" == "true" ] && [[ "$pkgbase" == python-* 
   if [ "${INPUT_USE_PYPI_PRERELEASE_VERSION:-'false'}" == "true" ]; then
     echo "Updated PKGBUILD with pkgver=${py_pkgprerelease}"
     sed -i "s|^pkgver=.*$|pkgver=${py_pkgprerelease}|" PKGBUILD
+    build_python=true
   elif [ "${INPUT_USE_PYPI_RELEASE_VERSION:-'false'}" == "true" ]; then
     echo "Updated PKGBUILD with pkgver=${py_pkgrelease}"
     sed -i "s|^pkgver=.*$|pkgver=${py_pkgrelease}|" PKGBUILD
+    build_python=true
   fi
 elif [ "${INPUT_IS_PYTHON_PKG:-'false'}" == "true" ]; then
   echo "Expecting python package but the name does not begin with 'python-*'. Ignoring pypi check..."
@@ -103,7 +106,12 @@ validpgpkeys="$(sed -n -e 's/^.*validpgpkeys = //p' .SRCINFO)"
 if [ -n "$custom_build_cmd" ]; then
   ${custom_build_cmd}
 else
-  makepkg --config /home/builder/.makepkg.conf -cfC --needed --nodeps --noconfirm
+  if [ $build_python == true ]; then
+    makepkg --config /home/builder/.makepkg.conf -cfC --needed --nodeps --noconfirm --skipinteg
+    updpkgsums
+  else
+    makepkg --config /home/builder/.makepkg.conf -cfC --needed --nodeps --noconfirm
+  fi
 fi
 echo "::endgroup::"
 
