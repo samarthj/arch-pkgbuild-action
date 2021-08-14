@@ -7,13 +7,6 @@ custom_build_cmd=${INPUT_CUSTOM_BUILD_CMD:-''}
 
 HOME=/home/builder
 
-echo "::group::Setting up pacman"
-uname -m
-sudo sed -i 's|#ParallelDownloads|ParallelDownloads|g' /etc/pacman.conf
-sudo pacman-key --init
-sudo pacman-key --populate archlinux
-echo "::endgroup::"
-
 echo "::group::Chown repo and move to \"${INPUT_PKGBUILD_ROOT}\""
 pkgbuild_path="$GITHUB_WORKSPACE/$INPUT_PKGBUILD_ROOT/PKGBUILD"
 if [ ! -f "$pkgbuild_path" ]; then
@@ -107,10 +100,10 @@ if [ -n "$custom_build_cmd" ]; then
   ${custom_build_cmd}
 else
   if [ $build_python == true ]; then
-    makepkg --config /home/builder/.makepkg.conf -cfC --needed --nodeps --noconfirm --skipinteg
+    makepkg -f --cleanbuild --needed --nodeps --noconfirm --skipinteg
     updpkgsums
   else
-    makepkg --config /home/builder/.makepkg.conf -cfC --needed --nodeps --noconfirm
+    makepkg -f --cleanbuild --needed --nodeps --noconfirm
   fi
 fi
 echo "::endgroup::"
@@ -138,7 +131,6 @@ else
     git push --set-upstream aur master
   fi
 fi
-exit 1
 echo "cleanup the git directory and ssh key"
 rm -rf .git /home/builder/.ssh/aur*
 echo "::endgroup::"
@@ -149,6 +141,7 @@ for ((i = 0; i < ${#pkgname[@]}; i++)); do
   ver="${pkgname[$i]}-${pkgver}-${pkgrel}"
   echo "::set-output name=pkg${i}::${ver}-${arch}.pkg.tar.zst"
   echo "::set-output name=ver${i}::${ver}"
-  sudo mv "/home/builder/packages/${ver}-${arch}.pkg.tar.zst" "${GITHUB_WORKSPACE}"
+  pkg_archive="$(sudo find /home/builder/packages -type f -name "${ver}-${arch}.pkg"*)"
+  sudo mv "$pkg_archive" "${GITHUB_WORKSPACE}"
 done
 echo "::endgroup::"
