@@ -117,7 +117,6 @@ makepkg --printsrcinfo >.SRCINFO
 cat .SRCINFO
 pkgver="$(sed -n -e 's/^.*pkgver = //p' .SRCINFO)"
 pkgrel="$(sed -n -e 's/^.*pkgrel = //p' .SRCINFO)"
-arch="$(sed -n -e 's/^.*arch = //p' .SRCINFO)"
 echo "::endgroup::"
 
 echo "::group::Publish PKGBUILD to AUR"
@@ -141,11 +140,13 @@ echo "::endgroup::"
 
 echo "::group::Setting artifact locations"
 for ((i = 0; i < ${#pkgname[@]}; i++)); do
-  echo "Package: ${pkgname[i]}"
+  echo "Package: ${pkgname[$i]}"
   ver="${pkgname[$i]}-${pkgver}-${pkgrel}"
-  echo "::set-output name=pkg${i}::${ver}-${arch}.pkg.tar.zst"
+  pkg_archive="$(sudo find /home/builder/packages -type f -name "${ver}-"*".pkg"*)"
+  echo "Package Archve: ${pkg_archive}"
+  filename="${pkg_archive##*/}"
+  echo "::set-output name=pkg${i}::${filename}"
   echo "::set-output name=ver${i}::${ver}"
-  pkg_archive="$(sudo find /home/builder/packages -type f -name "${ver}-${arch}.pkg"*)"
   sudo mv "$pkg_archive" "${GITHUB_WORKSPACE}"
 done
 echo "::endgroup::"
