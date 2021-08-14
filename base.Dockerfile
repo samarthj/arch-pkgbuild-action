@@ -1,5 +1,6 @@
 FROM ghcr.io/greyltc/archlinux-aur:paru
 LABEL maintainer="Sam <dev@samarthj.com>"
+LABEL org.opencontainers.image.source="https://github.com/samarthj/arch-pkgbuild-action"
 
 COPY ./ssh_config /home/builder/.ssh/config
 COPY ./.makepkg.conf /home/builder/.makepkg.conf

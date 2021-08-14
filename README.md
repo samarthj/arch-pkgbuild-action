@@ -79,3 +79,9 @@ The "$pkgver-$pkgrel" of the built package. The key name is an incrementing inte
     GOPATH: /home/builder/.local/share/go
     GOCACHE: /home/builder/.cache/go
 ```
+
+---
+
+# Credits
+
+- Using the prebuilt arch image from - https://github.com/greyltc-org/docker-archlinux-aur that incorporates paru as the aur helper.
