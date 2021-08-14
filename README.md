@@ -32,7 +32,11 @@ Note: The containerized build does not modify the permissions of the github work
 
 ## `is_python_pkg`
 
-**Optional** Whether this is a python format package. Based on the PKGBUILD documentations these should be prefixed with "python-", and this action needs that to be true, else the pypi version check is simply ignored. On its own changes no behaviour without the pypi flags. Default `false`.
+**Optional** Whether this is a python format package using pypi files as source. Based on the PKGBUILD documentations these should be prefixed with "python-", and this action needs that to be true. If that is not the case `python_pkg_name` may be used to override the basename of the python package on pypi. If neither is true or valid, then the pypi version check is simply ignored. On its own changes no behaviour without the pypi flags. Default `false`.
+
+## `python_pkg_name`
+
+**Optional** Override for the python package name. See `is_python_pkg` for use-case.
 
 ## `use_pypi_release_version`
 

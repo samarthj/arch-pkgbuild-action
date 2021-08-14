@@ -77,8 +77,8 @@ echo "::endgroup::"
 
 build_python=false
 echo "::group::Build package(s) ${pkgname[*]}"
-if [ "${INPUT_IS_PYTHON_PKG:-'false'}" == "true" ] && [[ "$pkgbase" == python-* ]]; then
-  py_pkgname="$(echo "${pkgbase}" | sed -re 's|^python-(.*)$|\1|g')"
+py_pkgname="${INPUT_PYTHON_PKG_NAME:-$(echo "${pkgbase}" | sed -re 's|^python-(.*)$|\1|g')}"
+if [ "${INPUT_IS_PYTHON_PKG:-'false'}" == "true" ] && [ -n "$py_pkgname" ]; then
   echo "Using python package ${py_pkgname}"
   py_pkgprerelease="$(curl -fSsL "https://pypi.org/rss/project/${py_pkgname}/releases.xml" | grep -oP '<title>.*$' | grep -vi 'PyPI' | head -n1 | sed -re 's|^.*>(.*)<.*$|\1|g')"
   echo "Latest release - ${py_pkgprerelease}"
@@ -94,7 +94,7 @@ if [ "${INPUT_IS_PYTHON_PKG:-'false'}" == "true" ] && [[ "$pkgbase" == python-* 
     build_python=true
   fi
 elif [ "${INPUT_IS_PYTHON_PKG:-'false'}" == "true" ]; then
-  echo "Expecting python package but the name does not begin with 'python-*'. Ignoring pypi check..."
+  echo "Expecting python package but the name ($py_pkgname) does not begin with 'python-*' and/ not provided as an input. Ignoring pypi check..."
 fi
 
 mapfile -t pkgname < <(sed -n -e 's/^pkgname = //p' .SRCINFO)

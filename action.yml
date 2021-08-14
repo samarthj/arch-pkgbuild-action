@@ -22,9 +22,12 @@ inputs:
     required: false
     default: 'true'
   is_python_pkg:
-    description: 'Whether this is a python format package. Based on the PKGBUILD documentations these should be prefixed with "python-", and this action needs that to be true, else the pypi version check is simply ignored. On its own changes no behaviour without the pypi flags.'
+    description: 'Whether this is a python format package using pypi files as source. Based on the PKGBUILD documentations these should be prefixed with "python-", and this action needs that to be true. If that is not the case `python_pkg_name` may be used to override the basename of the python package on pypi. If neither is true or valid, then the pypi version check is simply ignored. On its own changes no behaviour without the pypi flags.'
     required: false
     default: 'false'
+  python_pkg_name:
+    description: 'Override for the python package name. See `is_python_pkg` for use-case.'
+    required: false
   use_pypi_release_version:
     description: 'Whether to upgrade a python package using the latest release on pypi. Requires "is_python_pkg" to be true. It uses the pypi rss feed to read the latest release.'
     required: false
