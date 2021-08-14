@@ -57,10 +57,14 @@ git commit --message="wip"
 echo "pull --rebase the remote"
 git branch --set-upstream-to=aur/master master
 git pull --rebase --strategy recursive --strategy-option=theirs --allow-unrelated-histories --no-commit --no-edit aur master
-git reset --soft HEAD~1
-git fetch aur master
-git status
-git diff FETCH_HEAD
+if [ -z "$(git diff FETCH_HEAD --stat)" ]; then
+  echo 'The pkg is same as upstream. The rebase should have automatically dropped the "wip" commit.'
+else
+  echo 'The pkg is different from upstream. Will do a soft reset and commit later.'
+  git reset --soft HEAD~1
+  git fetch aur master
+  git diff FETCH_HEAD
+fi
 echo "::endgroup::"
 
 echo "::group::Install dependencies ${makedepends[*]}"
