@@ -17,7 +17,8 @@ RUN \
   chown -R builder:builder /home/builder && \
   echo "builder ALL=(ALL) NOPASSWD: ALL" >>/etc/sudoers && \
   pacman -Syyu --needed --noconfirm \
-  pacman-mirrorlist openssl openssh git gzip gnupg base-devel zstd pacman-contrib
+  pacman-mirrorlist openssl openssh git gzip gnupg base-devel zstd pacman-contrib \
+  rm -rf /var/cache/pacman/pkg/* /home/builder/packages/*
 
 USER builder
 
