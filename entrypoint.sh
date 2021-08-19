@@ -7,6 +7,13 @@ custom_build_cmd=${INPUT_CUSTOM_BUILD_CMD:-''}
 
 HOME=/home/builder
 
+echo "::group::Setting up pacman"
+uname -m
+sudo pacman-mirrors --geoip -m rank
+sudo pacman-key --init
+sudo pacman-key --populate archlinux
+echo "::endgroup::"
+
 echo "::group::Chown repo and move to \"${INPUT_PKGBUILD_ROOT}\""
 pkgbuild_path="$GITHUB_WORKSPACE/$INPUT_PKGBUILD_ROOT/PKGBUILD"
 if [ ! -f "$pkgbuild_path" ]; then
