@@ -9,7 +9,6 @@ HOME=/home/builder
 
 echo "::group::Setting up pacman"
 uname -m
-sudo pacman-mirrors --geoip -m rank
 sudo pacman-key --init
 sudo pacman-key --populate archlinux
 echo "::endgroup::"
