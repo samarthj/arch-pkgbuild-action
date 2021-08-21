@@ -2,7 +2,7 @@ name: Publish base image to pkg registry
 
 on:
   schedule:
-    - cron: '0 0 * * 1'
+    - cron: '0 23 * * *'
   workflow_dispatch:
 
 env:
