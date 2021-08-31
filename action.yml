@@ -40,6 +40,10 @@ inputs:
     description: 'Used for specifying a custom build command in-case the standard command is undesirable. The normal command used is "makepkg --config /home/builder/.makepkg.conf -cfC --needed --nodeps --noconfirm". Note: --nodeps is used since all dependencies are installed before a build is attempted.'
     required: false
     default: ''
+  install_optdepends:
+    description: 'Install optional dependencies.'
+    required: false
+    default: 'false'
 outputs:
   pkgn:
     description: 'The location of the built package. The key name is an incrementing integer for each package in the PKGBUILD. If the package is a split package, then there will be multiple keys starting with "pkg0". For a single package, only 1 key will be present as "pkg0".'
