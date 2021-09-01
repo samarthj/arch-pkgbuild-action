@@ -79,10 +79,11 @@ makepkg --printsrcinfo >.SRCINFO
 mapfile -t makedepends < <(sed -n -e 's/^\tmakedepends = //p' .SRCINFO)
 mapfile -t checkdepends < <(sed -n -e 's/^\tcheckdepends = //p' .SRCINFO)
 mapfile -t depends < <(sed -n -e 's/^\tdepends = //p' .SRCINFO)
-paru -S "${makedepends[@]}" "${checkdepends[@]}" "${depends[@]}" --noconfirm --skipreview
 if [ "${INPUT_INSTALL_OPTDEPENDS:-'false'}" == "true" ]; then
   mapfile -t optdepends < <(sed -n -e 's/^\toptdepends = //p' .SRCINFO)
-  paru -S "${optdepends[@]}" --noconfirm --skipreview
+  paru -S "${makedepends[@]}" "${checkdepends[@]}" "${depends[@]}" "${optdepends[@]}" --noconfirm --skipreview
+else
+  paru -S "${makedepends[@]}" "${checkdepends[@]}" "${depends[@]}" --noconfirm --skipreview
 fi
 echo "::endgroup::"
 
