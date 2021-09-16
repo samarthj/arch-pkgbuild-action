@@ -18,6 +18,7 @@ RUN \
   echo "builder ALL=(ALL) NOPASSWD: ALL" >>/etc/sudoers && \
   pacman -Syyu --needed --noconfirm \
   pacman-mirrorlist openssl openssh git gzip gnupg base-devel zstd pacman-contrib && \
+  paru -S rate-mirrors --noconfirm --skipreview && \
   rm -rf /var/cache/pacman/pkg/* /home/builder/packages/*
 
 USER builder
