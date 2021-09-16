@@ -11,7 +11,7 @@ echo "::group::Setting up pacman"
 uname -m
 sudo pacman-key --delete pacman@localhost
 sudo pacman-key --init
-#sudo pacman-key --populate archlinux
+sudo pacman-key --populate archlinux
 sudo pacman -Syy
 paru -S rate-mirrors --noconfirm --skipreview
 export TMPFILE="$(mktemp)"; \
