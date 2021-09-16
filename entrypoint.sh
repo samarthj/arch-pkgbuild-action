@@ -13,6 +13,12 @@ sudo pacman-key --delete pacman@localhost
 sudo pacman-key --init
 #sudo pacman-key --populate archlinux
 sudo pacman -Syy
+paru -S rate-mirrors --noconfirm --skipreview
+export TMPFILE="$(mktemp)"; \
+    sudo true; \
+    rate-mirrors --save=$TMPFILE arch --max-delay=21600 \
+      && sudo mv /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist-backup \
+      && sudo mv $TMPFILE /etc/pacman.d/mirrorlist
 echo "::endgroup::"
 
 echo "::group::Chown repo and move to \"${INPUT_PKGBUILD_ROOT}\""
