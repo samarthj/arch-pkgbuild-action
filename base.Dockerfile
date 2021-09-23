@@ -22,7 +22,7 @@ RUN pacman -Syyu --needed --noconfirm \
 
 USER builder
 RUN paru -S rate-mirrors --noconfirm --skipreview && \
-  rm -rf /var/cache/pacman/pkg/* /home/builder/packages/*
+  sudo rm -rf /var/cache/pacman/pkg/* /home/builder/packages/*
 
 ENV XDG_CACHE_HOME=/home/builder/.cache
 ENV XDG_CONFIG_HOME=/home/builder/.config
