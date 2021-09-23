@@ -15,13 +15,14 @@ RUN \
   mkdir -pv /home/builder/packages && \
   mkdir -pv /home/builder/sources && \
   chown -R builder:builder /home/builder && \
-  echo "builder ALL=(ALL) NOPASSWD: ALL" >>/etc/sudoers && \
-  pacman -Syyu --needed --noconfirm \
-  pacman-mirrorlist openssl openssh git gzip gnupg base-devel zstd pacman-contrib && \
-  rm -rf /var/cache/pacman/pkg/* /home/builder/packages/*
+  echo "builder ALL=(ALL) NOPASSWD: ALL" >>/etc/sudoers
+  
+RUN pacman -Syyu --needed --noconfirm \
+  pacman-mirrorlist openssl openssh git gzip gnupg base-devel zstd pacman-contrib
 
 USER builder
-RUN paru -S rate-mirrors --noconfirm --skipreview
+RUN paru -S rate-mirrors --noconfirm --skipreview && \
+  rm -rf /var/cache/pacman/pkg/* /home/builder/packages/*
 
 ENV XDG_CACHE_HOME=/home/builder/.cache
 ENV XDG_CONFIG_HOME=/home/builder/.config
