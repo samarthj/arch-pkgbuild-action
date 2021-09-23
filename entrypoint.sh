@@ -13,7 +13,7 @@ sudo pacman-key --delete pacman@localhost
 sudo pacman-key --init
 sudo pacman-key --populate archlinux
 sudo pacman -Syy
-paru -S rate-mirrors --noconfirm --skipreview
+# paru -S rate-mirrors --noconfirm --skipreview
 export TMPFILE="$(mktemp)"; \
     sudo true; \
     rate-mirrors --save=$TMPFILE arch --max-delay=21600 \
