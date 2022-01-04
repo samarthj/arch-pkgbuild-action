@@ -14,11 +14,11 @@ sudo pacman-key --init
 sudo pacman-key --populate archlinux
 sudo pacman -Syy
 # paru -S rate-mirrors --noconfirm --skipreview
-export TMPFILE="$(mktemp)"; \
-    sudo true; \
-    rate-mirrors --save=$TMPFILE arch --max-delay=21600 \
-      && sudo mv /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist-backup \
-      && sudo mv $TMPFILE /etc/pacman.d/mirrorlist
+export TMPFILE="$(mktemp)"
+sudo true
+rate-mirrors --save=$TMPFILE arch --max-delay=21600 &&
+  sudo mv /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist-backup &&
+  sudo mv $TMPFILE /etc/pacman.d/mirrorlist
 echo "::endgroup::"
 
 echo "::group::Chown repo and move to \"${INPUT_PKGBUILD_ROOT}\""
@@ -116,12 +116,13 @@ elif [ "${INPUT_IS_PYTHON_PKG:-'false'}" == "true" ]; then
   echo "Expecting python package but the name ($py_pkgname) does not begin with 'python-*' and/ not provided as an input. Ignoring pypi check..."
 elif [ "${INPUT_USE_GIT_RELEASE_VERSION:-'false'}" == "true" ]; then
   git_repo="${INPUT_GITHUB_PKG_REPOSITORY:-$(sed -n -e 's/^\turl = https:\/\/github\.com\///p' .SRCINFO)}"
-  git_release="$(curl -s "https://api.github.com/repos/${git_repo}/releases/latest" | grep '"tag_name"' | sed -E 's/.*"v([^"]+)".*/\1/')"
+  echo "Github repo: ${git_repo} release check..."
+  git_release="$(curl -fsSL "https://api.github.com/repos/${git_repo}/releases/latest" | grep '"tag_name"' | sed -E 's/.*"v([^"]+)".*/\1/')"
   if [ -n "${git_release}" ]; then
-    echo "Unable to find the latest release for ${git_repo}. Ignoring git release check..."
-  else
     echo "Using git release: ${git_release} for repo: ${git_repo}"
     sed -i "s|^pkgver=.*$|pkgver=${git_release}|" PKGBUILD
+  else
+    echo "Unable to find the latest release for ${git_repo}. Ignoring git release check..."
   fi
 fi
 
