@@ -29,13 +29,20 @@ inputs:
     description: 'Override for the python package name. See `is_python_pkg` for use-case.'
     required: false
   use_pypi_release_version:
-    description: 'Whether to upgrade a python package using the latest release on pypi. Requires "is_python_pkg" to be true. It uses the pypi rss feed to read the latest release.'
+    description: 'Whether to upgrade a python package using the latest release on pypi. Requires `is_python_pkg` to be true. It uses the pypi rss feed to read the latest release.'
     required: false
     default: 'false'
   use_pypi_prerelease_version:
-    description: 'Whether to upgrade a python package using the latest release (including prereleases - a, b, rc & dev) on pypi. Requires "is_python_pkg" to be true. Overrides the "use_pypi_release_version" regardless of value. It uses the pypi rss feed to read the latest release.'
+    description: 'Whether to upgrade a python package using the latest release (including prereleases - a, b, rc & dev) on pypi. Requires `is_python_pkg` to be true. Overrides the `use_pypi_release_version` regardless of value. It uses the pypi rss feed to read the latest release.'
     required: false
     default: 'false'
+  use_git_release_version:
+    description: 'Whether to upgrade a package using the latest release on github. Requires url in the PKGBUILD to use the format "https://github.com/owner/repository". If that is not the case `github_pkg_repository` may be used to override the repository url. It uses the github api to read the latest release and sets the pkgver to the release version.'
+    required: false
+    default: 'false'
+  github_pkg_repository:
+    description: 'Override for the github package repository. See `use_git_release_version` for use-case.'
+    required: false
   custom_build_cmd:
     description: 'Used for specifying a custom build command in-case the standard command is undesirable. The normal command used is "makepkg --config /home/builder/.makepkg.conf -cfC --needed --nodeps --noconfirm". Note: --nodeps is used since all dependencies are installed before a build is attempted.'
     required: false
