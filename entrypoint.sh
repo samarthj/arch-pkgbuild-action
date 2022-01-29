@@ -94,8 +94,9 @@ else
 fi
 echo "::endgroup::"
 
+echo "::group::Version check"
+current_pkgver="$(sed -n -e 's/^.*pkgver = //p' .SRCINFO)"
 build_python=false
-echo "::group::Build package(s) ${pkgname[*]}"
 py_pkgname="${INPUT_PYTHON_PKG_NAME:-$(echo "${pkgbase}" | sed -re 's|^python-(.*)$|\1|g')}"
 if [ "${INPUT_IS_PYTHON_PKG:-'false'}" == "true" ] && [ -n "$py_pkgname" ]; then
   echo "Using python package ${py_pkgname}"
@@ -106,10 +107,16 @@ if [ "${INPUT_IS_PYTHON_PKG:-'false'}" == "true" ] && [ -n "$py_pkgname" ]; then
   if [ "${INPUT_USE_PYPI_PRERELEASE_VERSION:-'false'}" == "true" ]; then
     echo "Updated PKGBUILD with pkgver=${py_pkgprerelease}"
     sed -i "s|^pkgver=.*$|pkgver=${py_pkgprerelease}|" PKGBUILD
+    if [ "$current_pkgver" != "${py_pkgprerelease}" ]; then
+      sed -i "s|^pkgrel=.*$|pkgrel=1|" PKGBUILD
+    fi
     build_python=true
   elif [ "${INPUT_USE_PYPI_RELEASE_VERSION:-'false'}" == "true" ]; then
     echo "Updated PKGBUILD with pkgver=${py_pkgrelease}"
     sed -i "s|^pkgver=.*$|pkgver=${py_pkgrelease}|" PKGBUILD
+    if [ "$current_pkgver" != "${py_pkgrelease}" ]; then
+      sed -i "s|^pkgrel=.*$|pkgrel=1|" PKGBUILD
+    fi
     build_python=true
   fi
 elif [ "${INPUT_IS_PYTHON_PKG:-'false'}" == "true" ]; then
@@ -121,10 +128,16 @@ elif [ "${INPUT_USE_GIT_RELEASE_VERSION:-'false'}" == "true" ]; then
   if [ -n "${git_release}" ]; then
     echo "Using git release: ${git_release} for repo: ${git_repo}"
     sed -i "s|^pkgver=.*$|pkgver=${git_release}|" PKGBUILD
+    if [ "$current_pkgver" != "${git_release}" ]; then
+      sed -i "s|^pkgrel=.*$|pkgrel=1|" PKGBUILD
+    fi
   else
     echo "Unable to find the latest release for ${git_repo}. Ignoring git release check..."
   fi
 fi
+echo "::endgroup::"
+
+echo "::group::Build package(s) ${pkgname[*]}"
 
 mapfile -t pkgname < <(sed -n -e 's/^pkgname = //p' .SRCINFO)
 validpgpkeys="$(sed -n -e 's/^.*validpgpkeys = //p' .SRCINFO)"
