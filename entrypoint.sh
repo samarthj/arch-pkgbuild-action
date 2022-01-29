@@ -56,12 +56,12 @@ echo "init git repo"
 git init -b master .
 [ -z "$INPUT_AUR_USERNAME" ] &&
   echo "ERROR: In order to commit to AUR, please add your 'INPUT_AUR_USERNAME'" && exit 1
-echo "save git local config"
-git config --local user.name "$INPUT_AUR_USERNAME"
+echo "save git global config"
+git config --global user.name "$INPUT_AUR_USERNAME"
 [ -z "$INPUT_AUR_EMAIL" ] &&
   echo "ERROR: In order to commit to AUR, please add your 'INPUT_AUR_EMAIL'" && exit 1
-git config --local user.email "$INPUT_AUR_EMAIL"
-git config --local init.defaultbranch "master"
+git config --global user.email "$INPUT_AUR_EMAIL"
+git config --global init.defaultbranch "master"
 echo "add ssh://aur@aur.archlinux.org/${pkgbase}.git as a remote"
 git remote add aur "ssh://aur@aur.archlinux.org/${pkgbase}.git"
 git fetch aur master

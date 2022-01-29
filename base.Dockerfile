@@ -16,7 +16,7 @@ RUN \
   mkdir -pv /home/builder/sources && \
   chown -R builder:builder /home/builder && \
   echo "builder ALL=(ALL) NOPASSWD: ALL" >>/etc/sudoers
-  
+
 RUN pacman -Syyu --needed --noconfirm \
   pacman-mirrorlist openssl openssh git gzip gnupg base-devel zstd pacman-contrib
 
