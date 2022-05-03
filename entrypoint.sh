@@ -27,6 +27,7 @@ if [ ! -f "$pkgbuild_path" ]; then
   echo "ERROR: Could not find the PKGBUILD at \"${INPUT_PKGBUILD_ROOT}\""
   exit 1
 fi
+git config --global --add safe.directory "$GITHUB_WORKSPACE/$INPUT_PKGBUILD_ROOT"
 sudo chmod -R a=rwX "$GITHUB_WORKSPACE/$INPUT_PKGBUILD_ROOT/"
 cd "$GITHUB_WORKSPACE/$INPUT_PKGBUILD_ROOT/" || exit 1
 
