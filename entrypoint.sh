@@ -87,12 +87,22 @@ makepkg --printsrcinfo >.SRCINFO
 mapfile -t makedepends < <(sed -n -e 's/^\tmakedepends = //p' .SRCINFO)
 mapfile -t checkdepends < <(sed -n -e 's/^\tcheckdepends = //p' .SRCINFO)
 mapfile -t depends < <(sed -n -e 's/^\tdepends = //p' .SRCINFO)
+mapfile -t provides < <(sed -n -e 's/^\tprovides = //p' .SRCINFO)
+for target in "${provides[@]}"; do
+  for i in "${!depends[@]}"; do
+    if [[ ${depends[i]} = "$target" ]]; then
+      unset 'depends[i]'
+    fi
+  done
+done
 if [ "${INPUT_INSTALL_OPTDEPENDS:-'false'}" == "true" ]; then
   mapfile -t optdepends < <(sed -n -e 's/^\toptdepends = //p' .SRCINFO)
-  paru -S "${makedepends[@]}" "${checkdepends[@]}" "${depends[@]}" "${optdepends[@]}" --noconfirm --skipreview
+  cmd="paru -S ${makedepends[*]} ${checkdepends[*]} ${depends[*]} ${optdepends[*]} --noconfirm --skipreview"
 else
-  paru -S "${makedepends[@]}" "${checkdepends[@]}" "${depends[@]}" --noconfirm --skipreview
+  cmd="paru -S ${makedepends[*]} ${checkdepends[*]} ${depends[*]} --noconfirm --skipreview"
 fi
+echo "Install cmd: '$cmd'"
+$cmd
 echo "::endgroup::"
 
 echo "::group::Version check"
