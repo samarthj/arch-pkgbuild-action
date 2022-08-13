@@ -173,6 +173,15 @@ pkgver="$(sed -n -e 's/^.*pkgver = //p' .SRCINFO)"
 pkgrel="$(sed -n -e 's/^.*pkgrel = //p' .SRCINFO)"
 echo "::endgroup::"
 
+echo "::group::Test install package"
+for ((i = 0; i < ${#pkgname[@]}; i++)); do
+  echo "Package: ${pkgname[$i]}"
+  ver="${pkgname[$i]}-${pkgver}-${pkgrel}"
+  pkg_archive="$(sudo find /home/builder/packages -type f -name "${ver}-"*".pkg"*)"
+  sudo pacman -U --noconfirm "$pkg_archive"
+done
+echo "::endgroup::"
+
 echo "::group::Publish PKGBUILD to AUR"
 if [ -z "$(git diff FETCH_HEAD --stat)" ]; then
   echo 'The pkg is un-changed.'
