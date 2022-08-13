@@ -97,9 +97,9 @@ for target in "${provides[@]}"; do
 done
 if [ "${INPUT_INSTALL_OPTDEPENDS:-'false'}" == "true" ]; then
   mapfile -t optdepends < <(sed -n -e 's/^\toptdepends = //p' .SRCINFO)
-  cmd="paru -S ${makedepends[*]} ${checkdepends[*]} ${depends[*]} ${optdepends[*]} --noconfirm --skipreview"
+  cmd="paru -S ${makedepends[*]} ${checkdepends[*]} ${depends[*]} ${optdepends[*]} --noconfirm --skipreview --skipreview --batchinstall --sudoloop --removemake --nopgpfetch"
 else
-  cmd="paru -S ${makedepends[*]} ${checkdepends[*]} ${depends[*]} --noconfirm --skipreview"
+  cmd="paru -S ${makedepends[*]} ${checkdepends[*]} ${depends[*]} --noconfirm --skipreview --skipreview --batchinstall --sudoloop --removemake --nopgpfetch"
 fi
 echo "Install cmd: '$cmd'"
 $cmd
@@ -158,10 +158,10 @@ if [ -n "$custom_build_cmd" ]; then
   ${custom_build_cmd}
 else
   if [ $build_python == true ]; then
-    makepkg -f --cleanbuild --needed --nodeps --noconfirm --skipinteg
+    makepkg -f --cleanbuild --needed --nodeps --noconfirm --skipinteg --skippgpcheck
     updpkgsums
   else
-    makepkg -f --cleanbuild --needed --nodeps --noconfirm
+    makepkg -f --cleanbuild --needed --nodeps --noconfirm --skippgpcheck
   fi
 fi
 echo "::endgroup::"
