@@ -46,15 +46,11 @@ echo "$INPUT_AUR_SSH_PRIVATE_KEY" >/home/builder/.ssh/aur
 chmod -vR 600 /home/builder/.ssh/*
 ssh-keygen -vy -f /home/builder/.ssh/aur >/home/builder/.ssh/aur.pub
 ls -la /home/builder/.ssh/
-eval "$(ssh-agent -s)"
-ssh-add /home/builder/.ssh/aur
 echo "check ssh key"
 ssh -i /home/builder/.ssh/aur aur@aur.archlinux.org help
 echo "::endgroup::"
 
 echo "::group::Setup AUR git-repo"
-echo "init git repo"
-git init -b master .
 [ -z "$INPUT_AUR_USERNAME" ] &&
   echo "ERROR: In order to commit to AUR, please add your 'INPUT_AUR_USERNAME'" && exit 1
 echo "save git global config"
@@ -63,6 +59,10 @@ git config --global user.name "$INPUT_AUR_USERNAME"
   echo "ERROR: In order to commit to AUR, please add your 'INPUT_AUR_EMAIL'" && exit 1
 git config --global user.email "$INPUT_AUR_EMAIL"
 git config --global init.defaultbranch "master"
+echo "init git repo at $(pwd)"
+touch test.txt
+ls -la .
+git init -b master .
 echo "add ssh://aur@aur.archlinux.org/${pkgbase}.git as a remote"
 git remote add aur "ssh://aur@aur.archlinux.org/${pkgbase}.git"
 git fetch aur master
