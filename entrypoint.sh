@@ -9,16 +9,16 @@ HOME=/home/builder
 
 echo "::group::Setting up pacman"
 uname -m
-sudo pacman-key --delete pacman@localhost
+# sudo pacman-key --delete pacman@localhost
 sudo pacman-key --init
 sudo pacman-key --populate archlinux
 sudo pacman -Syy
 # paru -S rate-mirrors --noconfirm --skipreview
-export TMPFILE="$(mktemp)"
-sudo true
-rate-mirrors --save=$TMPFILE arch --max-delay=21600 &&
-  sudo mv /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist-backup &&
-  sudo mv $TMPFILE /etc/pacman.d/mirrorlist
+# export TMPFILE="$(mktemp)"
+# sudo true
+# rate-mirrors --save=$TMPFILE arch --max-delay=21600 &&
+#   sudo mv /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist-backup &&
+#   sudo mv $TMPFILE /etc/pacman.d/mirrorlist
 echo "::endgroup::"
 
 echo "::group::Chown repo and move to \"${INPUT_PKGBUILD_ROOT}\""
@@ -97,9 +97,9 @@ for target in "${provides[@]}"; do
 done
 if [ "${INPUT_INSTALL_OPTDEPENDS:-'false'}" == "true" ]; then
   mapfile -t optdepends < <(sed -n -e 's/^\toptdepends = //p' .SRCINFO)
-  cmd="paru -S ${makedepends[*]} ${checkdepends[*]} ${depends[*]} ${optdepends[*]} --noconfirm --skipreview --skipreview --batchinstall --sudoloop --removemake --nopgpfetch"
+  cmd="paru -Sy ${makedepends[*]} ${checkdepends[*]} ${depends[*]} ${optdepends[*]} --noconfirm --skipreview --batchinstall --sudoloop --removemake"
 else
-  cmd="paru -S ${makedepends[*]} ${checkdepends[*]} ${depends[*]} --noconfirm --skipreview --skipreview --batchinstall --sudoloop --removemake --nopgpfetch"
+  cmd="paru -Sy ${makedepends[*]} ${checkdepends[*]} ${depends[*]} --noconfirm --skipreview --batchinstall --sudoloop --removemake"
 fi
 echo "Install cmd: '$cmd'"
 $cmd
@@ -158,10 +158,10 @@ if [ -n "$custom_build_cmd" ]; then
   ${custom_build_cmd}
 else
   if [ $build_python == true ]; then
-    makepkg -f --cleanbuild --needed --nodeps --noconfirm --skipinteg --skippgpcheck
+    makepkg -f --cleanbuild --needed --nodeps --noconfirm --skipinteg
     updpkgsums
   else
-    makepkg -f --cleanbuild --needed --nodeps --noconfirm --skippgpcheck
+    makepkg -f --cleanbuild --needed --nodeps --noconfirm
   fi
 fi
 echo "::endgroup::"

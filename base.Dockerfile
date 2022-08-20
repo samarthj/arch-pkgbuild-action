@@ -17,12 +17,16 @@ RUN \
   chown -R builder:builder /home/builder && \
   echo "builder ALL=(ALL) NOPASSWD: ALL" >>/etc/sudoers
 
-RUN pacman -Syyu --needed --noconfirm \
-  pacman-mirrorlist openssl openssh git gzip gnupg base-devel zstd pacman-contrib
+RUN \
+  pacman -Sy --noconfirm archlinux-keyring && \
+  pacman-key --init && pacman-key --populate archlinux && \
+  pacman -Syu --needed --noconfirm --asexplicit \
+  pacman-mirrorlist openssl openssh git gzip gnupg glibc base-devel zstd pacman-contrib && \
+  paccache -r && \
+  rm -rvf /var/cache/pacman/pkg/* /home/builder/packages/* && \
+  pacman-key --delete pacman@localhost
 
 USER builder
-RUN paru -S rate-mirrors --noconfirm --skipreview && \
-  sudo rm -rf /var/cache/pacman/pkg/* /home/builder/packages/*
 
 ENV XDG_CACHE_HOME=/home/builder/.cache
 ENV XDG_CONFIG_HOME=/home/builder/.config
