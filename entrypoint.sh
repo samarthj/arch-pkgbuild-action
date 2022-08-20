@@ -60,8 +60,6 @@ git config --global user.name "$INPUT_AUR_USERNAME"
 git config --global user.email "$INPUT_AUR_EMAIL"
 git config --global init.defaultbranch "master"
 echo "init git repo at $(pwd)"
-touch test.txt
-ls -la .
 git init -b master .
 echo "add ssh://aur@aur.archlinux.org/${pkgbase}.git as a remote"
 git remote add aur "ssh://aur@aur.archlinux.org/${pkgbase}.git"
