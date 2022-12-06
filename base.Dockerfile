@@ -21,7 +21,7 @@ RUN \
   pacman -Sy --noconfirm archlinux-keyring && \
   pacman-key --init && pacman-key --populate archlinux && \
   pacman -Syu --needed --noconfirm --asexplicit \
-  pacman-mirrorlist openssl openssh git gzip gnupg glibc base-devel zstd pacman-contrib && \
+  pacman-mirrorlist openssl openssl-1.1 openssh git gzip gnupg glibc base-devel zstd pacman-contrib && \
   paccache -r && \
   rm -rvf /var/cache/pacman/pkg/* /home/builder/packages/* && \
   pacman-key --delete pacman@localhost
