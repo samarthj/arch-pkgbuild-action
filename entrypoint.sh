@@ -39,46 +39,48 @@ cat .SRCINFO
 pkgbase="$(sed -n -e 's/^pkgbase = //p' .SRCINFO)"
 echo "::endgroup::"
 
-echo "::group::Setup AUR ssh"
-echo "store aur ssh config"
-ssh-keyscan -v -t "rsa,dsa,ecdsa,ed25519" aur.archlinux.org >>/home/builder/.ssh/known_hosts
-echo "$INPUT_AUR_SSH_PRIVATE_KEY" >/home/builder/.ssh/aur
-chmod -vR 600 /home/builder/.ssh/*
-ssh-keygen -vy -f /home/builder/.ssh/aur >/home/builder/.ssh/aur.pub
-ls -la /home/builder/.ssh/
-echo "check ssh key"
-ssh -i /home/builder/.ssh/aur aur@aur.archlinux.org help
-echo "::endgroup::"
+if [ "${INPUT_SETUP_AUR:-'true'}" == "true" ]; then
+  echo "::group::Setup AUR ssh"
+  echo "store aur ssh config"
+  ssh-keyscan -v -t "rsa,dsa,ecdsa,ed25519" aur.archlinux.org >>/home/builder/.ssh/known_hosts
+  echo "$INPUT_AUR_SSH_PRIVATE_KEY" >/home/builder/.ssh/aur
+  chmod -vR 600 /home/builder/.ssh/*
+  ssh-keygen -vy -f /home/builder/.ssh/aur >/home/builder/.ssh/aur.pub
+  # ls -la /home/builder/.ssh/
+  echo "check ssh key"
+  ssh -i /home/builder/.ssh/aur aur@aur.archlinux.org help
+  echo "::endgroup::"
 
-echo "::group::Setup AUR git-repo"
-[ -z "$INPUT_AUR_USERNAME" ] &&
-  echo "ERROR: In order to commit to AUR, please add your 'INPUT_AUR_USERNAME'" && exit 1
-echo "save git global config"
-git config --global user.name "$INPUT_AUR_USERNAME"
-[ -z "$INPUT_AUR_EMAIL" ] &&
-  echo "ERROR: In order to commit to AUR, please add your 'INPUT_AUR_EMAIL'" && exit 1
-git config --global user.email "$INPUT_AUR_EMAIL"
-git config --global init.defaultbranch "master"
-echo "init git repo at $(pwd)"
-git init -b master .
-echo "add ssh://aur@aur.archlinux.org/${pkgbase}.git as a remote"
-git remote add aur "ssh://aur@aur.archlinux.org/${pkgbase}.git"
-git fetch aur master
-echo "commit current working tree"
-git add -A
-git commit --message="wip"
-echo "pull --rebase the remote"
-git branch --set-upstream-to=aur/master master
-git pull --rebase --strategy recursive --strategy-option=theirs --allow-unrelated-histories --no-commit --no-edit aur master
-if [ -z "$(git diff FETCH_HEAD --stat)" ]; then
-  echo 'The pkg is same as upstream. The rebase should have automatically dropped the "wip" commit.'
-else
-  echo 'The pkg is different from upstream. Will do a soft reset and commit later.'
-  git reset --soft HEAD~1
+  echo "::group::Setup AUR git-repo"
+  [ -z "$INPUT_AUR_USERNAME" ] &&
+    echo "ERROR: In order to commit to AUR, please add your 'INPUT_AUR_USERNAME'" && exit 1
+  echo "save git global config"
+  git config --global user.name "$INPUT_AUR_USERNAME"
+  [ -z "$INPUT_AUR_EMAIL" ] &&
+    echo "ERROR: In order to commit to AUR, please add your 'INPUT_AUR_EMAIL'" && exit 1
+  git config --global user.email "$INPUT_AUR_EMAIL"
+  git config --global init.defaultbranch "master"
+  echo "init git repo at $(pwd)"
+  git init -b master .
+  echo "add ssh://aur@aur.archlinux.org/${pkgbase}.git as a remote"
+  git remote add aur "ssh://aur@aur.archlinux.org/${pkgbase}.git"
   git fetch aur master
-  git diff FETCH_HEAD
+  echo "commit current working tree"
+  git add -A
+  git commit --message="wip"
+  echo "pull --rebase the remote"
+  git branch --set-upstream-to=aur/master master
+  git pull --rebase --strategy recursive --strategy-option=theirs --allow-unrelated-histories --no-commit --no-edit aur master
+  if [ -z "$(git diff FETCH_HEAD --stat)" ]; then
+    echo 'The pkg is same as upstream. The rebase should have automatically dropped the "wip" commit.'
+  else
+    echo 'The pkg is different from upstream. Will do a soft reset and commit later.'
+    git reset --soft HEAD~1
+    git fetch aur master
+    git diff FETCH_HEAD
+  fi
+  echo "::endgroup::"
 fi
-echo "::endgroup::"
 
 echo "::group::Install dependencies ${makedepends[*]}"
 makepkg --printsrcinfo >.SRCINFO
@@ -180,24 +182,26 @@ for ((i = 0; i < ${#pkgname[@]}; i++)); do
 done
 echo "::endgroup::"
 
-echo "::group::Publish PKGBUILD to AUR"
-if [ -z "$(git diff FETCH_HEAD --stat)" ]; then
-  echo 'The pkg is un-changed.'
-else
-  echo 'The pkg .SRCINFO has changed.'
-  git add -A
-  git status
-  commit_msg="${INPUT_COMMIT_MESSAGE:-"updpkg: ${pkgname[*]} ${pkgver}-${pkgrel}"}"
-  echo "Committing with message: ${commit_msg}"
-  git commit --message="${commit_msg}"
-  git status
-  if [ "$dry_run" == "false" ]; then
-    git push --set-upstream aur master
+if [ "${INPUT_SETUP_AUR:-'true'}" == "true" ]; then
+  echo "::group::Publish PKGBUILD to AUR"
+  if [ -z "$(git diff FETCH_HEAD --stat)" ]; then
+    echo 'The pkg is un-changed.'
+  else
+    echo 'The pkg .SRCINFO has changed.'
+    git add -A
+    git status
+    commit_msg="${INPUT_COMMIT_MESSAGE:-"updpkg: ${pkgname[*]} ${pkgver}-${pkgrel}"}"
+    echo "Committing with message: ${commit_msg}"
+    git commit --message="${commit_msg}"
+    git status
+    if [ "$dry_run" == "false" ]; then
+      git push --set-upstream aur master
+    fi
   fi
+  echo "cleanup the git directory and ssh key"
+  rm -rf .git /home/builder/.ssh/aur*
+  echo "::endgroup::"
 fi
-echo "cleanup the git directory and ssh key"
-rm -rf .git /home/builder/.ssh/aur*
-echo "::endgroup::"
 
 echo "::group::Setting artifact locations"
 for ((i = 0; i < ${#pkgname[@]}; i++)); do

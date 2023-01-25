@@ -17,6 +17,10 @@ inputs:
   commit_message:
     description: 'Commit message for the AUR package.'
     required: false
+  setup_aur:
+    description: 'Whether to do the AUR setup or skip it.'
+    required: false
+    default: 'true'
   dry_run:
     description: 'Used for testing the action. To do a full commit, set this to false'
     required: false

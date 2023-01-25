@@ -28,6 +28,10 @@ Note: There are two optional configurations for pypi and git release version tra
 
 **Optional** Commit message for the AUR package. Default `upgpkg: <pkgname> <pkgver>-<pkgrel>`
 
+### `setup_aur`
+
+**Optional** Whether to do the AUR setup or skip it.
+
 ### `dry_run`
 
 **Optional** Used for testing the action. To do a full commit, set this to false. Default `true`.
@@ -79,7 +83,7 @@ The "$pkgver-$pkgrel" of the built package. The key name is an incrementing inte
 ```yaml
 - name: Build
   id: build
-  uses: samarthj/arch-pkgbuild-action@v1
+  uses: samarthj/arch-pkgbuild-action@v2
   with:
     pkgbuild_root: path/to/pkgbuild_folder
     aur_username: Your Name
