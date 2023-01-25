@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 set -euo pipefail
 
@@ -101,12 +101,12 @@ echo "Including depends: ${depends[*]}"
 if [ "${INPUT_INSTALL_OPTDEPENDS:-'false'}" == "true" ]; then
   mapfile -t optdepends < <(grep 'optdepends = ' .SRCINFO | cut -d':' -f1 | cut -d' ' -f3)
   echo "Including optdepends: ${optdepends[*]}"
-  cmd="paru -Sy ${makedepends[*]} ${checkdepends[*]} ${depends[*]} ${optdepends[*]} --noconfirm --skipreview --batchinstall --sudoloop --removemake"
+  cmd="paru -Sy ${makedepends[*]} ${checkdepends[*]} ${depends[*]} ${optdepends[*]} --noconfirm --needed --skipreview --batchinstall --sudoloop --removemake"
 else
-  cmd="paru -Sy ${makedepends[*]} ${checkdepends[*]} ${depends[*]} --noconfirm --skipreview --batchinstall --sudoloop --removemake"
+  cmd="paru -Sy ${makedepends[*]} ${checkdepends[*]} ${depends[*]} --noconfirm --needed --skipreview --batchinstall --sudoloop --removemake"
 fi
 echo "Install cmd: '$cmd'"
-$cmd
+$cmd || true
 echo "::endgroup::"
 
 echo "::group::Version check"
@@ -162,7 +162,7 @@ updpkgsums
 if [ -n "$custom_build_cmd" ]; then
   ${custom_build_cmd}
 else
-  makepkg -f --cleanbuild --needed --nodeps --noconfirm
+  makepkg -f --cleanbuild --needed --syncdeps --noconfirm --rmdeps
 fi
 echo "::endgroup::"
 
