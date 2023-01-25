@@ -115,7 +115,7 @@ strip_prefix="${pkgbase#python-}"
 strip_suffix="${strip_prefix%-git}"
 strip_suffix="${strip_suffix%-bin}"
 py_pkgname="${INPUT_PYTHON_PKG_NAME:-$strip_suffix}"
-if [[ ("${INPUT_IS_PYTHON_PKG:-'false'}" == "true" && -n "${INPUT_PYTHON_PKG_NAME}") || ("$pkgbase" =~ "^python-" && ! "$py_pkgname" =~ "-git$" && -n "$py_pkgname") ]]; then
+if [[ (${INPUT_IS_PYTHON_PKG:-'false'} == "true" && -n ${py_pkgname}) || ($pkgbase =~ "^python-" && -n $py_pkgname) ]]; then
   echo "Using python package ${py_pkgname}"
   py_pkgprerelease="$(curl -fSsL "https://pypi.org/rss/project/${py_pkgname}/releases.xml" | grep -oP '<title>.*$' | grep -vi 'PyPI' | head -n1 | sed -re 's|^.*>(.*)<.*$|\1|g')"
   echo "Latest release - ${py_pkgprerelease}"
