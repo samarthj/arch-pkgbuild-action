@@ -57,8 +57,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
-          context: base
-          file: Dockerfile
+          context: '{{defaultContext}}:base'
           target: final
           push: true
           tags: ${{ steps.meta.outputs.tags }}
