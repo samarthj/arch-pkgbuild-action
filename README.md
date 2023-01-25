@@ -72,11 +72,11 @@ Note: There are two optional configurations for pypi and git release version tra
 
 ### `pkg<n>`
 
-The location of the built package. The key name is an incrementing integer for each package in the PKGBUILD. If the package is a split package, then there will be multiple keys starting with "pkg0". For a single package, only 1 key will be present as "pkg0".
+The filename of the built package archive. The key name is an incrementing integer for each package in the PKGBUILD. If the package is a split package, then there will be multiple keys starting with "pkg0". For a single package, only 1 key will be present as "pkg0".
 
 ### `ver<n>`
 
-The "$pkgver-$pkgrel" of the built package. The key name is an incrementing integer for each package in the PKGBUILD. If the package is a split package, then there will be multiple keys starting with "ver0". For a single package, only 1 key will be present as "ver0".
+The "<pkgname>-<pkgver>-<pkgrel>" of the built package. The key name is an incrementing integer for each package in the PKGBUILD. If the package is a split package, then there will be multiple keys starting with "ver0". For a single package, only 1 key will be present as "ver0".
 
 ## Usage Example
 
