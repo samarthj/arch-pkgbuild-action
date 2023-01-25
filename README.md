@@ -102,4 +102,4 @@ The "$pkgver-$pkgrel" of the built package. The key name is an incrementing inte
 
 ## Credits
 
-- Using the prebuilt arch image from - <https://github.com/greyltc-org/docker-archlinux-aur> that incorporates paru as the aur helper.
+- Used the prebuilt arch image from - <https://github.com/greyltc-org/docker-archlinux-aur> that incorporates paru as the aur helper until v2.5. Going forward it is a self-built image.
