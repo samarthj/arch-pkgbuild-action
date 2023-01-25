@@ -107,9 +107,11 @@ echo "::endgroup::"
 
 echo "::group::Version check"
 current_pkgver="$(sed -n -e 's/^.*pkgver = //p' .SRCINFO)"
-build_python=false
-py_pkgname="${INPUT_PYTHON_PKG_NAME:-$(echo "${pkgbase}" | sed -re 's|^python-(.*)$|\1|g')}"
-if [ "${INPUT_IS_PYTHON_PKG:-'false'}" == "true" ] && [ -n "$py_pkgname" ]; then
+strip_prefix="${pkgbase#python-}"
+strip_suffix="${strip_prefix%-git}"
+strip_suffix="${strip_suffix%-bin}"
+py_pkgname="${INPUT_PYTHON_PKG_NAME:-$strip_suffix}"
+if [[ ("${INPUT_IS_PYTHON_PKG:-'false'}" == "true" && -n "${INPUT_PYTHON_PKG_NAME}") || ("$pkgbase" =~ "^python-" && ! "$py_pkgname" =~ "-git$" && -n "$py_pkgname") ]]; then
   echo "Using python package ${py_pkgname}"
   py_pkgprerelease="$(curl -fSsL "https://pypi.org/rss/project/${py_pkgname}/releases.xml" | grep -oP '<title>.*$' | grep -vi 'PyPI' | head -n1 | sed -re 's|^.*>(.*)<.*$|\1|g')"
   echo "Latest release - ${py_pkgprerelease}"
@@ -121,14 +123,12 @@ if [ "${INPUT_IS_PYTHON_PKG:-'false'}" == "true" ] && [ -n "$py_pkgname" ]; then
     if [ "$current_pkgver" != "${py_pkgprerelease}" ]; then
       sed -i "s|^pkgrel=.*$|pkgrel=1|" PKGBUILD
     fi
-    build_python=true
   elif [ "${INPUT_USE_PYPI_RELEASE_VERSION:-'false'}" == "true" ]; then
     echo "Updated PKGBUILD with pkgver=${py_pkgrelease}"
     sed -i "s|^pkgver=.*$|pkgver=${py_pkgrelease}|" PKGBUILD
     if [ "$current_pkgver" != "${py_pkgrelease}" ]; then
       sed -i "s|^pkgrel=.*$|pkgrel=1|" PKGBUILD
     fi
-    build_python=true
   fi
 elif [ "${INPUT_IS_PYTHON_PKG:-'false'}" == "true" ]; then
   echo "Expecting python package but the name ($py_pkgname) does not begin with 'python-*' and/ not provided as an input. Ignoring pypi check..."
@@ -157,12 +157,7 @@ updpkgsums
 if [ -n "$custom_build_cmd" ]; then
   ${custom_build_cmd}
 else
-  if [ $build_python == true ]; then
-    makepkg -f --cleanbuild --needed --nodeps --noconfirm --skipinteg
-    updpkgsums
-  else
-    makepkg -f --cleanbuild --needed --nodeps --noconfirm
-  fi
+  makepkg -f --cleanbuild --needed --nodeps --noconfirm
 fi
 echo "::endgroup::"
 
