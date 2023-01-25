@@ -47,8 +47,8 @@ jobs:
             type=semver,pattern=v{{version}},priority=500
             type=schedule,pattern={{date 'YYYY-MM-DD' tz='America/Los_Angeles'}},priority=500
           labels: |
-            maintainer="Sam <dev@samarthj.com>"
-            org.opencontainers.image.source="ghcr.io/${{ github.repository }}"
+            maintainer=Sam <dev@samarthj.com>
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
 
       - name: Build and push
         uses: docker/build-push-action@v3
