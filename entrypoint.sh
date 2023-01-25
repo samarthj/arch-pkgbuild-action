@@ -162,7 +162,7 @@ updpkgsums
 if [ -n "$custom_build_cmd" ]; then
   ${custom_build_cmd}
 else
-  makepkg -f --cleanbuild --needed --syncdeps --noconfirm --rmdeps
+  makepkg -f --cleanbuild --clean --needed --syncdeps --noconfirm --rmdeps --asdeps
 fi
 echo "::endgroup::"
 
