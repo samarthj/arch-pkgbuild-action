@@ -4,6 +4,8 @@ on:
   schedule:
     - cron: '0 23 * * 3'
   push:
+    paths:
+      - .github/workflows/base-img.yml
     tags:
       - 'v*'
   workflow_dispatch:
@@ -60,6 +62,7 @@ jobs:
           cache-to: type=gha,mode=max
           pull: true
           push: true
-          github-token: ${{ secrets.PAT }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          secrets: |
+            GIT_AUTH_TOKEN=${{ secrets.PAT }}
