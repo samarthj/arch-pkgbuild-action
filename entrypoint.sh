@@ -136,7 +136,8 @@ if [[ ("${INPUT_IS_PYTHON_PKG:-'false'}" == "true" && -n "${INPUT_PYTHON_PKG_NAM
   fi
 elif [ "${INPUT_IS_PYTHON_PKG:-'false'}" == "true" ]; then
   echo "Expecting python package but the name ($py_pkgname) does not begin with 'python-*' and/ not provided as an input. Ignoring pypi check..."
-elif [ "${INPUT_USE_GIT_RELEASE_VERSION:-'false'}" == "true" ]; then
+fi
+if [ "${INPUT_USE_GIT_RELEASE_VERSION:-'false'}" == "true" ]; then
   git_repo="${INPUT_GITHUB_PKG_REPOSITORY:-$(sed -n -e 's/^\turl = https:\/\/github\.com\///p' .SRCINFO)}"
   echo "Github repo: ${git_repo} release check..."
   git_release="$(curl -fsSL "https://api.github.com/repos/${git_repo}/releases/latest" | grep '"tag_name"' | sed -E 's/.*"v([^"]+)".*/\1/')"
