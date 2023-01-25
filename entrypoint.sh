@@ -90,13 +90,17 @@ mapfile -t depends < <(sed -n -e 's/^\tdepends = //p' .SRCINFO)
 mapfile -t provides < <(sed -n -e 's/^\tprovides = //p' .SRCINFO)
 for target in "${provides[@]}"; do
   for i in "${!depends[@]}"; do
-    if [[ ${depends[i]} = "$target" ]]; then
+    if [[ ${depends[i]} == "$target" ]]; then
       unset 'depends[i]'
     fi
   done
 done
+echo "Including makedepends: ${makedepends[*]}"
+echo "Including checkdepends: ${checkdepends[*]}"
+echo "Including depends: ${depends[*]}"
 if [ "${INPUT_INSTALL_OPTDEPENDS:-'false'}" == "true" ]; then
-  mapfile -t optdepends < <(sed -n -e 's/^\toptdepends = //p' .SRCINFO)
+  mapfile -t optdepends < <(grep 'optdepends = ' .SRCINFO | cut -d':' -f1 | cut -d' ' -f3)
+  echo "Including optdepends: ${optdepends[*]}"
   cmd="paru -Sy ${makedepends[*]} ${checkdepends[*]} ${depends[*]} ${optdepends[*]} --noconfirm --skipreview --batchinstall --sudoloop --removemake"
 else
   cmd="paru -Sy ${makedepends[*]} ${checkdepends[*]} ${depends[*]} --noconfirm --skipreview --batchinstall --sudoloop --removemake"
