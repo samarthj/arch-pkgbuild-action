@@ -16,9 +16,9 @@ RUN \
 
 RUN --mount=type=cache,target=/var/cache/pacman/pkg,sharing=locked \
   --mount=type=tmpfs,target=/tmp \
-  pacman -Sy --noconfirm archlinux-keyring && \
   pacman-key --init && \
   pacman-key --populate archlinux && \
+  pacman -Sy --noconfirm archlinux-keyring && \
   pacman -Sy --needed --noconfirm \
   git openssl pacman-contrib namcap \
   fakechroot fakeroot
