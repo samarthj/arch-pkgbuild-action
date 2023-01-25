@@ -10,7 +10,7 @@ RUN \
   useradd --uid 1000 --shell /usr/bin/false builder && \
   mkdir -pv \
   /home/builder/.ssh /home/builder/.config /home/builder/.cache /home/builder/.local/share \
-  /home/builder/packages /home/builder/sources && \
+  /home/builder/packages /home/builder/sources /home/builder/srcpackages && \
   chown -R builder:builder /home/builder && \
   echo "builder ALL=(ALL) NOPASSWD: ALL" >>/etc/sudoers
 
@@ -57,7 +57,7 @@ RUN \
   find /tmp -type f -name paru-*.pkg.* -exec pacman -U --noconfirm {} \; && \
   mkdir -pv /var/cache/pacman/pkg && \
   paccache -r && \
-  rm -rvf /var/cache/pacman/pkg/* /home/builder/packages/* /tmp/* && \
+  rm -rvf /var/cache/pacman/pkg/* /home/builder/packages/* /home/builder/sources/* \
   pacman-key --delete pacman@localhost
 
 USER builder
