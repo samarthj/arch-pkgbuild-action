@@ -175,9 +175,17 @@ echo "::endgroup::"
 
 echo "::group::Test install package"
 for ((i = 0; i < ${#pkgname[@]}; i++)); do
-  echo "Package: ${pkgname[$i]}"
-  ver="${pkgname[$i]}-${pkgver}-${pkgrel}"
+  pkg=${pkgname[$i]}
+  echo "Package: ${pkg}"
+  ver="${pkg}-${pkgver}-${pkgrel}"
   pkg_archive="$(sudo find /home/builder/packages -type f -name "${ver}-"*".pkg"*)"
+  provider="${pkg%-git}"
+  provider="${provider%-bin}"
+  echo "Checking: if ${provider} already exists"
+  if pacman -T "${provider}"; then
+    echo "Removing: if ${provider} already exists"
+    sudo pacman -Rcus --noconfirm "${provider}"
+  fi
   sudo pacman -U --noconfirm "$pkg_archive"
 done
 echo "::endgroup::"
