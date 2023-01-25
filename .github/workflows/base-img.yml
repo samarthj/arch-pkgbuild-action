@@ -27,7 +27,7 @@ jobs:
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: gchr.io
           username: ${{ github.actor }}
           password: ${{ secrets.PAT }}
 
@@ -36,7 +36,8 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: |
+            ghcr.io/${{ github.repository }}
           tags: |
             type=raw,value=latest,enable={{is_default_branch}},priority=1000
             type=ref,event=tag,priority=900
@@ -47,7 +48,7 @@ jobs:
             type=schedule,pattern={{date 'YYYY-MM-DD' tz='America/Los_Angeles'}},priority=500
           labels: |
             maintainer="Sam <dev@samarthj.com>"
-            org.opencontainers.image.source="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
+            org.opencontainers.image.source="ghcr.io/${{ github.repository }}"
 
       - name: Build and push
         uses: docker/build-push-action@v3
