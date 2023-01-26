@@ -1,0 +1,22 @@
+name: Publish base image to pkg registry
+
+on:
+  schedule:
+    - cron: '0 13 * * 3'
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/prune.yml
+  workflow_dispatch:
+
+jobs:
+  prune:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prune
+        uses: actions/delete-package-versions@v4
+        with:
+          package-name: arch-pkgbuild-action
+          package-type: container
+          min-versions-to-keep: 10

@@ -12,9 +12,6 @@ on:
     types: [published]
   workflow_dispatch:
 
-env:
-  IMAGE_NAME: arch-pkgbuild-action
-
 jobs:
   build:
     runs-on: ubuntu-latest
