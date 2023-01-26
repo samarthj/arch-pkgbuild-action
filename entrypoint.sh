@@ -218,8 +218,9 @@ for ((i = 0; i < ${#pkgname[@]}; i++)); do
   pkg_archive="$(sudo find /home/builder/packages -type f -name "${ver}-"*".pkg"*)"
   echo "Package Archve: ${pkg_archive}"
   filename="${pkg_archive##*/}"
-  echo "pkg${i}=${filename}" >>"$GITHUB_OUTPUT"
-  echo "ver${i}=${ver}" >>"$GITHUB_OUTPUT"
+  ls -la "${GITHUB_OUTPUT}"
+  echo "pkg${i}=${filename}" | sudo tee -a "${GITHUB_OUTPUT}"
+  echo "ver${i}=${ver}" | sudo tee -a "${GITHUB_OUTPUT}"
   sudo mv "$pkg_archive" "${GITHUB_WORKSPACE}"
 done
 echo "::endgroup::"
