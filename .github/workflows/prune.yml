@@ -1,4 +1,4 @@
-name: Publish base image to pkg registry
+name: Prune pkg registry
 
 on:
   schedule:
