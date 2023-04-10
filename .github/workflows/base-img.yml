@@ -10,6 +10,9 @@ on:
       - .github/workflows/base-img.yml
   release:
     types: [published]
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
@@ -28,6 +31,8 @@ jobs:
             name=ghcr.io/${{ github.repository }}
           tags: |
             type=raw,value=latest,enable={{is_default_branch}},priority=1000
+            type=ref,event=branch,priority=900
+            type=ref,event=pr,priority=900
             type=ref,event=tag,priority=900
             type=semver,pattern=v{{major}},priority=800
             type=semver,pattern=v{{major}}.{{minor}},priority=700
